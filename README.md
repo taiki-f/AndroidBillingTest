@@ -11,3 +11,7 @@ Androidの「[Google Play Billing Library 3.0](https://developer.android.com/goo
 - app : 動作テスト用のプロジェクト
 - blling : 課金処理をAARにまとめるプロジェクト
   - AAR内のJARのみを使用するようにしています。
+
+## ライセンス
+MIT License  
+詳しくはLICENSEをご確認ください。
