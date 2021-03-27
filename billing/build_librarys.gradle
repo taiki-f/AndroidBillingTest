@@ -1,0 +1,131 @@
+// バリアントタイプ
+def VALIANT_TYPE = ''
+
+tasks.whenTaskAdded { Task task ->
+    // タスクの依存関係を設定
+    if (task.name == 'assembleDebug' ||
+        task.name == 'assembleRelease') {
+        task.dependsOn(createJar)
+    }
+}
+
+gradle.taskGraph.beforeTask { Task task ->
+    // バリアントタイプを決定
+    if (task.path == (':' + projectDir.name + ':preReleaseBuild')) {
+        VALIANT_TYPE = 'release'
+    }
+    else
+    if (task.path == (':' + projectDir.name + ':preDebugBuild')) {
+        VALIANT_TYPE = 'debug'
+    }
+}
+
+// ライブラリパス
+def LIB_APP_PATH = rootDir.path + '/app/libs/'
+def LIB_INPUT_PATH = projectDir.path + '/build/intermediates/aar_main_jar/'
+def LIB_OUTPUT_PATH = projectDir.path + '/../build/outputs/libs/'
+def LIB_INPUT_FILE = 'classes.jar'
+def LIB_OUTPUT_FILE = 'billing.jar'
+
+// Jarの削除
+task deleteJar {
+    doLast {
+        println('task deleteJar')
+
+        def dir = new File(LIB_OUTPUT_PATH + VALIANT_TYPE + '/')
+        dir.deleteDir()
+        dir.mkdirs()
+
+        def file = new File(LIB_APP_PATH + LIB_OUTPUT_FILE)
+        println file.name
+        file.delete()
+    }
+}
+task deleteReleaseJar {
+    doLast {
+        println('task deleteReleaseJar')
+
+        def dir = new File(LIB_OUTPUT_PATH + 'release/')
+        dir.deleteDir()
+        dir.mkdirs()
+
+        def file = new File(LIB_APP_PATH + LIB_OUTPUT_FILE)
+        file.delete()
+    }
+}
+task deleteDebugJar {
+    doLast {
+        println('task deleteDebugJar')
+
+        def dir = new File(LIB_OUTPUT_PATH + 'debug/')
+        dir.deleteDir()
+        dir.mkdirs()
+
+        def file = new File(LIB_APP_PATH + LIB_OUTPUT_FILE)
+        file.delete()
+    }
+}
+
+// Jarのコピー
+task createJar {
+    doLast {
+        println('task createJar : ' + VALIANT_TYPE)
+
+        copy {
+            from(LIB_INPUT_PATH + VALIANT_TYPE + '/')
+            into(LIB_OUTPUT_PATH + VALIANT_TYPE + '/')
+            include(LIB_INPUT_FILE)
+            rename(LIB_INPUT_FILE, LIB_OUTPUT_FILE)
+        }
+
+        copy {
+            from(LIB_INPUT_PATH + VALIANT_TYPE + '/')
+            into(LIB_APP_PATH)
+            include(LIB_INPUT_FILE)
+            rename(LIB_INPUT_FILE, LIB_OUTPUT_FILE)
+        }
+    }
+}
+task createReleaseJar {
+    doLast {
+        println('task createReleaseJar')
+
+        copy {
+            from(LIB_INPUT_PATH + 'release/')
+            into(LIB_OUTPUT_PATH + 'release/')
+            include(LIB_INPUT_FILE)
+            rename(LIB_INPUT_FILE, LIB_OUTPUT_FILE)
+        }
+
+        copy {
+            from(LIB_INPUT_PATH + 'release/')
+            into(LIB_APP_PATH)
+            include(LIB_INPUT_FILE)
+            rename(LIB_INPUT_FILE, LIB_OUTPUT_FILE)
+        }
+    }
+}
+task createDebugJar {
+    doLast {
+        println('task createDebugJar')
+
+        copy {
+            from(LIB_INPUT_PATH + 'debug/')
+            into(LIB_OUTPUT_PATH + 'debug/')
+            include(LIB_INPUT_FILE)
+            rename(LIB_INPUT_FILE, LIB_OUTPUT_FILE)
+        }
+
+        copy {
+            from(LIB_INPUT_PATH + 'debug/')
+            into(LIB_APP_PATH)
+            include(LIB_INPUT_FILE)
+            rename(LIB_INPUT_FILE, LIB_OUTPUT_FILE)
+        }
+    }
+}
+
+// Jarを削除してからコピーを行う
+createJar.dependsOn(deleteJar)
+createReleaseJar.dependsOn(deleteReleaseJar)
+createDebugJar.dependsOn(deleteDebugJar)
