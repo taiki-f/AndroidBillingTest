@@ -9,7 +9,7 @@ pipeline {
 
     stage('Build') {
       steps {
-        bat 'gradlew assembleDebug'
+        bat 'gradlew :billing:assembleDebug'
       }
     }
 
